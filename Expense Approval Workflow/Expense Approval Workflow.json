@@ -1,0 +1,441 @@
+{
+  "name": "Expense Approval Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formId": "FORM_PLACEHOLDER"
+      },
+      "type": "n8n-nodes-base.typeformTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Typeform Trigger",
+      "webhookId": "WEBHOOK_PLACEHOLDER",
+      "credentials": {
+        "typeformApi": {
+          "id": "TYPEFORMAPI_ID_PLACEHOLDER",
+          "name": "Placeholder typeformApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ID_PLACEHOLDER",
+              "name": "employee_name",
+              "value": "={{ $json['What is the employee\\'s name?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "ID_PLACEHOLDER",
+              "name": "employee_email",
+              "value": "={{ $json['What is the employee\\'s email address?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "ID_PLACEHOLDER",
+              "name": "category",
+              "value": "={{ $json['Which category best fits this expense?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "ID_PLACEHOLDER",
+              "name": "amount",
+              "value": "={{ $json['What is the amount of the expense?'] }}",
+              "type": "number"
+            },
+            {
+              "id": "ID_PLACEHOLDER",
+              "name": "description",
+              "value": "={{ $json['Please provide a brief description of the expense.'] }}",
+              "type": "string"
+            },
+            {
+              "id": "ID_PLACEHOLDER",
+              "name": "receipt_date",
+              "value": "={{ $json['When was the receipt issued?'] }}",
+              "type": "string"
+            },
+            {
+              "id": "ID_PLACEHOLDER",
+              "name": "manager_email",
+              "value": "={{ $json['Manager\\'s email'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a financial analyst assistant. Analyze this employee expense submission and provide a brief assessment for the manager.\n\nEmployee: {{ $('Edit Fields').item.json.employee_name }}\nCategory: {{ $('Edit Fields').item.json.category }}\nAmount: ${{ $('Edit Fields').item.json.amount }}\nDescription: {{ $('Edit Fields').item.json.description }}\nReceipt Date: {{ $('Edit Fields').item.json.receipt_date }}\n\nProvide a JSON response with exactly these fields:\n{\n  \"assessment\": \"Normal/Review Recommended/Flag for Audit\",\n  \"reason\": \"one sentence explanation\",\n  \"suggested_action\": \"one sentence recommendation for the manager\"\n}\n\nReturn only the JSON, nothing else."
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GOOGLEPALMAPI_ID_PLACEHOLDER",
+          "name": "Placeholder googlePalmApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.candidates[0].content.parts[0].text;\nconst cleaned = raw\n  .replace(/```json\\n?/g, '')\n  .replace(/```\\n?/g, '')\n  .trim();\n\nconst parsed = JSON.parse(cleaned)\n\nreturn [{\n  json:{\n    assessment: parsed.assessment,\n    reason: parsed.reason,\n    suggested_action: parsed.suggested_action\n  }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Expense Tracker",
+          "cachedResultUrl": "https://airtable.com/appXKP6VzPnhby9hR"
+        },
+        "table": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Expenses",
+          "cachedResultUrl": "https://airtable.com/appXKP6VzPnhby9hR/tblxs2XyaXV1VuXGb"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Employee Name": "={{ $('Edit Fields').item.json.employee_name }}",
+            "Employee Email": "={{ $('Edit Fields').item.json.employee_email }}",
+            "Category": "={{ $('Edit Fields').item.json.category }}",
+            "Amount": "={{ $('Edit Fields').item.json.amount }}",
+            "Description": "={{ $('Edit Fields').item.json.description }}",
+            "Receipt Date": "={{ $('Edit Fields').item.json.receipt_date }}",
+            "Manager Email": "={{ $('Edit Fields').item.json.manager_email }}",
+            "Status": "Pending",
+            "Assessment": "={{ $json.assessment }}",
+            "Reason": "={{ $json.reason }}",
+            "Suggested Action": "={{ $json.suggested_action }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Employee Name",
+              "displayName": "Employee Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Rejected",
+                  "value": "Rejected"
+                },
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Approved",
+                  "value": "Approved"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Employee Email",
+              "displayName": "Employee Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Receipt Date",
+              "displayName": "Receipt Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Manager Email",
+              "displayName": "Manager Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Assessment",
+              "displayName": "Assessment",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Suggested Action",
+              "displayName": "Suggested Action",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1056,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "AIRTABLETOKENAPI_ID_PLACEHOLDER",
+          "name": "Placeholder airtableTokenApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://slack.com/api/chat.postMessage",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"channel\": \"employee-expenses\",\n  \"text\": \"New Expense Approval Request\",\n  \"blocks\": [\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*New Expense Approval Request*\\n*Employee:* {{ $('Edit Fields').item.json.employee_name }}\\n*Category:* {{ $('Edit Fields').item.json.category }}\\n*Amount:* ${{ $('Edit Fields').item.json.amount }}\\n*Description:* {{ $('Edit Fields').item.json.description }}\\n*AI Assessment:* {{ $('Code in JavaScript').item.json.assessment }}\\n*Reason:* {{ $('Code in JavaScript').item.json.reason }}\\n*Suggested Action:* {{ $('Code in JavaScript').item.json.suggested_action }}\"\n      }\n    },\n    {\n      \"type\": \"actions\",\n      \"elements\": [\n        {\n          \"type\": \"button\",\n          \"text\": {\n            \"type\": \"plain_text\",\n            \"text\": \"Approve\"\n          },\n          \"style\": \"primary\",\n          \"value\": \"approve|{{ $('Create a record').item.json.id }}|{{ $('Edit Fields').item.json.employee_email }}\",\n          \"action_id\": \"approve_expense\"\n        },\n        {\n          \"type\": \"button\",\n          \"text\": {\n            \"type\": \"plain_text\",\n            \"text\": \"Reject\"\n          },\n          \"style\": \"danger\",\n          \"value\": \"reject|{{ $('Create a record').item.json.id }}|{{ $('Edit Fields').item.json.employee_email }}\",\n          \"action_id\": \"reject_expense\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1264,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HTTPHEADERAUTH_ID_PLACEHOLDER",
+          "name": "Placeholder httpHeaderAuth Credential"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Typeform Trigger": [
+      {
+        "json": {
+          "What is the employee's name?": "Sarah Chen",
+          "What is the employee's email address?": "FbBy5Z@example.com",
+          "Which category best fits this expense?": "Software/Subscriptions",
+          "What is the amount of the expense?": 51,
+          "Please provide a brief description of the expense.": "Questionable hotel accommodation charges during the business trip last month.",
+          "When was the receipt issued?": "2013-05-29",
+          "Manager's email": "j.thompson@nexustech.net"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Typeform Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "VERSION_PLACEHOLDER",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "INSTANCE_PLACEHOLDER"
+  },
+  "id": "ID_PLACEHOLDER",
+  "tags": []
+}

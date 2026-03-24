@@ -1,0 +1,815 @@
+{
+  "name": "Expense Approval Handler",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "SECRET_PLACEHOLDER",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -64
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Webhook",
+      "webhookId": "WEBHOOK_PLACEHOLDER"
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = JSON.parse($input.first().json.body.payload);\nconst rawValue = payload.actions[0].value;\nconst [action, record_id, employee_email] = rawValue.split('|');\nconst response_url = payload.response_url;\n\nreturn [{\n  json: {\n    action,\n    record_id,\n    employee_email,\n    response_url\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ID_PLACEHOLDER",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "approve",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        -64
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Expense Tracker",
+          "cachedResultUrl": "https://airtable.com/appXKP6VzPnhby9hR"
+        },
+        "table": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Expenses",
+          "cachedResultUrl": "https://airtable.com/appXKP6VzPnhby9hR/tblxs2XyaXV1VuXGb"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.record_id }}",
+            "Status": "Approved"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Employee Name",
+              "displayName": "Employee Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Rejected",
+                  "value": "Rejected"
+                },
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Approved",
+                  "value": "Approved"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Employee Email",
+              "displayName": "Employee Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Receipt Date",
+              "displayName": "Receipt Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Manager Email",
+              "displayName": "Manager Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Assessment",
+              "displayName": "Assessment",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Suggested Action",
+              "displayName": "Suggested Action",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        -160
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "AIRTABLETOKENAPI_ID_PLACEHOLDER",
+          "name": "Placeholder airtableTokenApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Create or update a record').item.json.fields['Employee Email'] }}",
+        "subject": "=Your Expense Request Has Been Approved",
+        "message": "={{ $('Code in JavaScript1').item.json.emailBody }}",
+        "options": {
+          "appendAttribution": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1696,
+        -160
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Send a message",
+      "webhookId": "WEBHOOK_PLACEHOLDER",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAILOAUTH2_ID_PLACEHOLDER",
+          "name": "Placeholder gmailOAuth2 Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an HR assistant. Write a professional expense approval email in HTML format.\n\nEmployee Name: {{ $json.fields['Employee Name'] }}\nManager Email: {{ $json.fields['Manager Email'] }}\n\nRequirements:\n- Use \"Dear [Employee Name]\" using the actual name provided\n- Primary color is teal (#008080)\n- Do not include company name placeholder\n- For contact info use only the manager email provided, no placeholders\n- Mention the expense has been approved and will be reimbursed in the next payroll cycle\n- Keep it concise and professional\n- Sign off as \"HR Team\"\n\nReturn only the HTML email body, nothing else."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        -160
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GOOGLEPALMAPI_ID_PLACEHOLDER",
+          "name": "Placeholder googlePalmApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.content.parts[0].text;\nconst cleaned = raw\n     .replace(/```html\\n?/g, '')\n  .replace(/```\\n?/g, '')\n  .trim();\n\nreturn [{json: {emailBody: cleaned} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        -160
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.content.parts[0].text;\nconst cleaned = raw\n     .replace(/```html\\n?/g, '')\n  .replace(/```\\n?/g, '')\n  .trim();\n\nreturn [{json: {emailBody: cleaned} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        32
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Code in JavaScript (false branch)"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Create or update a record (false branch)').item.json.fields['Employee Email'] }}",
+        "subject": "=Your Expense Request Has Been Denied",
+        "message": "={{ $('Code in JavaScript (false branch)').item.json.emailBody }}",
+        "options": {
+          "appendAttribution": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1696,
+        32
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Send a message (false branch)",
+      "webhookId": "WEBHOOK_PLACEHOLDER",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAILOAUTH2_ID_PLACEHOLDER",
+          "name": "Placeholder gmailOAuth2 Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an HR assistant. Write a professional expense rejection email in HTML format.\n\nEmployee Name: {{ $json.fields['Employee Name'] }}\nManager Email: {{ $json.fields['Manager Email'] }}\n\nRequirements:\n- Use \"Dear [Employee Name]\" using the actual name provided\n- Primary color is teal (#008080)\n- Do not include company name placeholder\n- For contact info use only the manager email provided, no placeholders\n- Do not include [Expense ID] placeholder\n- Do not include links to expense policy\n- Keep it concise and professional\n- Sign off as \"HR Team\"\n\nReturn only the HTML email body, nothing else."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        32
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Message a model (false branch)",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GOOGLEPALMAPI_ID_PLACEHOLDER",
+          "name": "Placeholder googlePalmApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Expense Tracker",
+          "cachedResultUrl": "https://airtable.com/appXKP6VzPnhby9hR"
+        },
+        "table": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Expenses",
+          "cachedResultUrl": "https://airtable.com/appXKP6VzPnhby9hR/tblxs2XyaXV1VuXGb"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Code in JavaScript').item.json.record_id }}",
+            "Status": "Rejected"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Employee Name",
+              "displayName": "Employee Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Rejected",
+                  "value": "Rejected"
+                },
+                {
+                  "name": "Pending",
+                  "value": "Pending"
+                },
+                {
+                  "name": "Approved",
+                  "value": "Approved"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Employee Email",
+              "displayName": "Employee Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Receipt Date",
+              "displayName": "Receipt Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Manager Email",
+              "displayName": "Manager Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Assessment",
+              "displayName": "Assessment",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Suggested Action",
+              "displayName": "Suggested Action",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        32
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Create or update a record (false branch)",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "AIRTABLETOKENAPI_ID_PLACEHOLDER",
+          "name": "Placeholder airtableTokenApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Code in JavaScript').item.json.response_url }}",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={   \"replace_original\": true,   \"text\": \" *Expense Approved* by {{ $('Create or update a record').item.json.fields['Manager Email'] }} — confirmation sent to {{ $('Code in JavaScript').item.json.employee_email }}\" }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1472,
+        -160
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Code in JavaScript').item.json.response_url }}",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"replace_original\": true,\n  \"text\": \" *Expense Rejected* by {{ $('Create or update a record (false branch)').item.json.fields['Manager Email'] }} — notification sent to {{ $('Code in JavaScript').item.json.employee_email }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1472,
+        32
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "HTTP Request (false branch)"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n-miglearn.onrender.com",
+            "user-agent": "Slackbot 1.0 (+https://api.slack.com/robots)",
+            "content-length": "3106",
+            "accept": "application/json,*/*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "98.91.227.153",
+            "cf-ipcountry": "US",
+            "cf-ray": "SECRET_PLACEHOLDER",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/x-www-form-urlencoded",
+            "render-proxy-ttl": "4",
+            "rndr-id": "RNDR-ID_PLACEHOLDER",
+            "true-client-ip": "98.91.227.153",
+            "x-forwarded-for": "98.91.227.153, 172.71.151.201, 10.23.8.196",
+            "x-forwarded-proto": "https",
+            "x-request-start": "SECRET_PLACEHOLDER",
+            "x-slack-request-timestamp": "1774334655",
+            "x-slack-signature": "v0=84fb69b29655b84230dafa46df3603ea1bb221f53e1d95ea710d7f718b37d517"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "payload": "{\"type\":\"block_actions\",\"user\":{\"id\":\"U0AME6FTB8R\",\"username\":\"stacruzgarnt\",\"name\":\"stacruzgarnt\",\"team_id\":\"T0AMVH38PS4\"},\"api_app_id\":\"A0AM4TF492Q\",\"token\":\"osjTX5pxw0xHShTXhtapwXHO\",\"container\":{\"type\":\"message\",\"message_ts\":\"1774334629.223989\",\"channel_id\":\"C0AMRS5DERM\",\"is_ephemeral\":false},\"trigger_id\":\"10759801992325.10743581295888.59610a59610d43ac6a930c3ab51f7394\",\"team\":{\"id\":\"T0AMVH38PS4\",\"domain\":\"it-urgent\"},\"enterprise\":null,\"is_enterprise_install\":false,\"channel\":{\"id\":\"C0AMRS5DERM\",\"name\":\"employee-expenses\"},\"message\":{\"user\":\"U0ALUTP6A3D\",\"type\":\"message\",\"ts\":\"1774334629.223989\",\"bot_id\":\"B0ALZ7ZG2F8\",\"app_id\":\"A0AM4TF492Q\",\"text\":\"New Expense Approval Request\",\"team\":\"T0AMVH38PS4\",\"blocks\":[{\"type\":\"section\",\"block_id\":\"qudDH\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*New Expense Approval Request*\\n*Employee:* Robert Johnson\\n*Category:* Travel\\n*Amount:* $6\\n*Description:* Overpriced conference registration fee was disappointing\\n*AI Assessment:* Review Recommended\\n*Reason:* The submitted amount of $6 for a 'conference registration fee' is unusually low and contradicts the description 'overpriced,' suggesting a potential error or miscategorization.\\n*Suggested Action:* The manager should request clarification from Robert Johnson regarding the actual expense incurred and ask for a detailed receipt or invoice for the conference registration.\",\"verbatim\":false}},{\"type\":\"actions\",\"block_id\":\"EBWxa\",\"elements\":[{\"type\":\"button\",\"action_id\":\"approve_expense\",\"text\":{\"type\":\"plain_text\",\"text\":\"Approve\",\"emoji\":true},\"style\":\"primary\",\"value\":\"approve|recb3TyW0KQRY4Z9o|c79YAB@example.com\"},{\"type\":\"button\",\"action_id\":\"reject_expense\",\"text\":{\"type\":\"plain_text\",\"text\":\"Reject\",\"emoji\":true},\"style\":\"danger\",\"value\":\"reject|recb3TyW0KQRY4Z9o|c79YAB@example.com\"}]}]},\"state\":{\"values\":{}},\"response_url\":\"https:\\/\\/hooks.slack.com\\/actions\\/T0AMVH38PS4\\/10756835600723\\/oH6OvRErVgxdsQQmfVhjWrfM\",\"actions\":[{\"action_id\":\"reject_expense\",\"block_id\":\"EBWxa\",\"text\":{\"type\":\"plain_text\",\"text\":\"Reject\",\"emoji\":true},\"value\":\"reject|recb3TyW0KQRY4Z9o|c79YAB@example.com\",\"style\":\"danger\",\"type\":\"button\",\"action_ts\":\"1774334655.993487\"}]}"
+          },
+          "webhookUrl": "https://n8n-miglearn.onrender.com/webhook/expense-approval",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create or update a record (false branch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript (false branch)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (false branch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model (false branch)": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript (false branch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record (false branch)": {
+      "main": [
+        [
+          {
+            "node": "Message a model (false branch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request (false branch)": {
+      "main": [
+        [
+          {
+            "node": "Send a message (false branch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "VERSION_PLACEHOLDER",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "INSTANCE_PLACEHOLDER"
+  },
+  "id": "ID_PLACEHOLDER",
+  "tags": []
+}
