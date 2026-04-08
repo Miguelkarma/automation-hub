@@ -1,80 +1,40 @@
-# Automation Hub
+# ⚡ Automation Workflows
 
-A collection of automation workflows, experiments, and integrations built using various no-code and low-code tools.
-
-This repository acts as a playground for exploring different automation patterns, testing integrations, and building small systems that simulate real-world use cases.
+This repo contains automated workflows that streamline business processes, reduce manual work, and improve efficiency using modern automation and AI tools.
 
 ---
 
-## What’s Inside
+## 🛠 Tools
 
-This repo includes different automation workflows such as:
-
-- Form submission handling
-- Notification systems
-- Data routing and transformation
-- API and webhook-based integrations
-
-Each workflow is stored as a JSON file and can be imported directly into the respective automation platform.
+n8n · Make.com · Typeform · HubSpot · Slack · Google Gemini AI · Gmail · Airtable · Notion · Google Drive
 
 ---
 
-## Structure
+## 📂 Workflows
 
-```
-/lead-gen
-/it-helpdesk
-/ecommerce
-```
+### 1. IT Helpdesk Ticket Auto-Router
 
-Each folder contains workflows related to a specific use case or domain.
+- Automates ticket intake, prioritization, HubSpot ticket creation, Slack alerts, and AI confirmation emails.
+- **Result:** No manual sorting, instant P1 alerts, clean CRM data.
+- **Flow:** `Typeform → n8n → HubSpot → Slack → Gemini → Gmail`
 
----
+### 2. Client Onboarding
 
-## Example Workflow
+- Automates HubSpot contacts, Notion pages, welcome emails, Slack notifications, and Drive folders from Airtable.
+- **Result:** Full onboarding in <30s, consistent setup.
+- **Flow:** `Airtable → HubSpot → Notion → Gemini → Gmail → Slack → Drive`
 
-### Typeform → Slack Notification
+### 3. Expense Approval
 
-- Captures form submissions via webhook
-- Applies conditional logic based on priority
-- Sends automated alerts to Slack channels
-
-**Tools Used:**
-
-- n8n
-- Typeform
-- Slack
+- Employees submit expenses via Typeform, AI flags anomalies, managers approve in Slack, and employees get instant emails.
+- **Result:** Zero email chains, instant approvals, full audit trail.
+- **Flow:** `Typeform → n8n → Gemini → Airtable → Slack → Webhook → Gmail`
 
 ---
 
-## Tools & Technologies
+## ⚡ Benefits
 
-- n8n
-- Make (Integromat)
-- Typeform
-- Slack
-- Notion
-- Webhooks & REST APIs
-
----
-
-## Purpose
-
-- Experiment with automation tools and integrations
-- Explore workflow design patterns
-- Simulate real-world automation scenarios
-- Continuously improve system-building skills
-
----
-
-## Notes
-
-- Workflows are exported in JSON format
-- Some flows may be experimental or incomplete
-- Configurations (API keys, credentials) are not included
-
----
-
-## Ongoing
-
-This repository is continuously evolving as new workflows and ideas are tested and implemented.
+- Saves time & reduces errors
+- Instant notifications & approvals
+- Clean, consistent records
+- Scalable, AI-enhanced automation
