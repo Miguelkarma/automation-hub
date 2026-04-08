@@ -6,16 +6,16 @@ This repository contains automated workflows that streamline business processes,
 
 ## Tools
 
-<a href="https://n8n.io"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/n8n.svg" alt="n8n" height="30" style="filter: brightness(0) invert(1);"/></a>
-<a href="https://www.make.com"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/make.svg" alt="Make.com" height="30" style="filter: brightness(0) invert(1);"/></a>
-<a href="https://www.typeform.com"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/typeform.svg" alt="Typeform" height="30" style="filter: brightness(0) invert(1);"/></a>
-<a href="https://www.hubspot.com"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/hubspot.svg" alt="HubSpot" height="30" style="filter: brightness(0) invert(1);"/></a>
-<a href="https://slack.com"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/slack.svg" alt="Slack" height="30" style="filter: brightness(0) invert(1);"/></a>
-<a href="https://ai.google"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/google.svg" alt="Google Gemini" height="30" style="filter: brightness(0) invert(1);"/></a>
-<a href="https://mail.google.com"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/gmail.svg" alt="Gmail" height="30" style="filter: brightness(0) invert(1);"/></a>
-<a href="https://airtable.com"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/airtable.svg" alt="Airtable" height="30" style="filter: brightness(0) invert(1);"/></a>
-<a href="https://www.notion.so"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/notion.svg" alt="Notion" height="30" style="filter: brightness(0) invert(1);"/></a>
-<a href="https://drive.google.com"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/googledrive.svg" alt="Google Drive" height="30" style="filter: brightness(0) invert(1);"/></a>
+[![n8n](https://img.shields.io/badge/n8n-%23FFFFFF?style=for-the-badge&logo=n8n&logoColor=white)](https://n8n.io)
+[![Make](https://img.shields.io/badge/Make.com-%23FFFFFF?style=for-the-badge&logo=make&logoColor=white)](https://www.make.com)
+[![Typeform](https://img.shields.io/badge/Typeform-%23FFFFFF?style=for-the-badge&logo=typeform&logoColor=white)](https://www.typeform.com)
+[![HubSpot](https://img.shields.io/badge/HubSpot-%23FFFFFF?style=for-the-badge&logo=hubspot&logoColor=white)](https://www.hubspot.com)
+[![Slack](https://img.shields.io/badge/Slack-%23FFFFFF?style=for-the-badge&logo=slack&logoColor=white)](https://slack.com)
+[![Google](https://img.shields.io/badge/Google-%23FFFFFF?style=for-the-badge&logo=google&logoColor=white)](https://ai.google)
+[![Gmail](https://img.shields.io/badge/Gmail-%23FFFFFF?style=for-the-badge&logo=gmail&logoColor=white)](https://mail.google.com)
+[![Airtable](https://img.shields.io/badge/Airtable-%23FFFFFF?style=for-the-badge&logo=airtable&logoColor=white)](https://airtable.com)
+[![Notion](https://img.shields.io/badge/Notion-%23FFFFFF?style=for-the-badge&logo=notion&logoColor=white)](https://www.notion.so)
+[![Google Drive](https://img.shields.io/badge/Google_Drive-%23FFFFFF?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com)
 
 ---
 
