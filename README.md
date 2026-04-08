@@ -6,12 +6,16 @@ This repository contains automated workflows that streamline business processes,
 
 ## Tools
 
+## Tools
+
 [![n8n](https://img.shields.io/badge/n8n-automation-blue?style=for-the-badge)](https://n8n.io)
 [![Make](https://img.shields.io/badge/Make.com-automation-blue?style=for-the-badge)](https://www.make.com)
 [![Typeform](https://img.shields.io/badge/Typeform-forms-blue?style=for-the-badge)](https://www.typeform.com)
 [![HubSpot](https://img.shields.io/badge/HubSpot-CRM-blue?style=for-the-badge)](https://www.hubspot.com)
 [![Slack](https://img.shields.io/badge/Slack-chat-blue?style=for-the-badge)](https://slack.com)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI-blue?style=for-the-badge)](https://ai.google)
+[![OpenAI](https://img.shields.io/badge/OpenAI-LLM-blue?style=for-the-badge)](https://openai.com)
+[![LLM Integration](https://img.shields.io/badge/LLM-Integration-blue?style=for-the-badge)](#)
 [![Gmail](https://img.shields.io/badge/Gmail-email-blue?style=for-the-badge)](https://mail.google.com)
 [![Airtable](https://img.shields.io/badge/Airtable-database-blue?style=for-the-badge)](https://airtable.com)
 [![Notion](https://img.shields.io/badge/Notion-docs-blue?style=for-the-badge)](https://www.notion.so)
