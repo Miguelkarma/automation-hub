@@ -1,0 +1,342 @@
+{
+  "name": "Research AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemma-3-1b-it",
+          "mode": "list",
+          "cachedResultName": "models/gemma-3-1b-it"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an expert Valorant analyst specialized in tracking and summarizing the latest developments in the game and its competitive ecosystem. Your task is to deliver concise and up-to-date news summaries focused on new agent releases, patch notes, meta changes, tournament results, roster moves, team performances, and strategic developments in the Valorant Champions Tour (VCT).",
+              "role": "model"
+            },
+            {
+              "content": "=Find and summarize the most recent Valorant news from the last 24 hours. Today is {{ $today }}. \n\nFor each news item include:\n- A 2-3 sentence detailed summary\n- The full source URL\n- Bold agent names and team names\n\nCover: patch notes, agent changes, meta shifts, VCT results, roster moves."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GOOGLEPALMAPI_ID_PLACEHOLDER",
+          "name": "Placeholder googlePalmApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "=valorant-news-session"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        704,
+        224
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-32b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        544,
+        224
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "GROQAPI_ID_PLACEHOLDER",
+          "name": "Placeholder groqApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Valorant news formatter.\n\nYour role is to process, check and clean Valorant news results fetched from the web, to ensure readability and that past headlines are not repeated, when checked against Google Sheet Tool name \"Past Valorant News Log\"\n\nHere is today's Valorant news list from the web:\n{{ $json.content.parts[0].text }}\n\nPlease:\n- Cross-check against the past headlines above and remove duplicates.\n- Ensure each item has a clear, impactful 1-2 sentence summary.\n- After each summary, include the full source URL.\n- Use bold to highlight agent names and team names.\n- Add spacing between news items.\n\nIf all results are duplicates, respond with \"No notable Valorant news in the past 24 hours\"\n\n##Output Format Rule\nOutput in text only, and start the daily news summary with \"Here's today's Valorant news. Today is {{ $today }} ...\"",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        632,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Update Checking Agent"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Past Valorant News",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JBHjB-EVEhS9PQocoRQeCujg-ALJbvMe3L10ax5y3TI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JBHjB-EVEhS9PQocoRQeCujg-ALJbvMe3L10ax5y3TI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        880,
+        224
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Past Valorant Logs",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLESHEETSOAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder googleSheetsOAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "stacruzgarnt@gmail.com",
+        "subject": "Daily Valorant News",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Send a message",
+      "webhookId": "WEBHOOK_PLACEHOLDER",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAILOAUTH2_ID_PLACEHOLDER",
+          "name": "Placeholder gmailOAuth2 Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Past Valorant News",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JBHjB-EVEhS9PQocoRQeCujg-ALJbvMe3L10ax5y3TI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JBHjB-EVEhS9PQocoRQeCujg-ALJbvMe3L10ax5y3TI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $today }}",
+            "Headlines": "={{ $('Update Checking Agent').item.json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Headlines",
+              "displayName": "Headlines",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1264,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLESHEETSOAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder googleSheetsOAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Valorant Update Tracker\nScheduled research pipeline that monitors Valorant patch updates, summarizes changes via AI, and delivers a report to your inbox",
+        "height": 512,
+        "width": 1648,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -128
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Update Checking Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Update Checking Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Update Checking Agent",
+            "type": "SECRET_PLACEHOLDER",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Past Valorant Logs": {
+      "ai_tool": [
+        [
+          {
+            "node": "Update Checking Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Checking Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "VERSION_PLACEHOLDER",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "INSTANCE_PLACEHOLDER"
+  },
+  "id": "ID_PLACEHOLDER",
+  "tags": []
+}
