@@ -1,0 +1,310 @@
+{
+  "name": "Company Profile Enrichment Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        288
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v2/scrape",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"url\": \"https://www.vanslobbe.nl/geefmomenten/seizoenen/winter\",\n  \"formats\": [\n    \"markdown\"\n  ],\n  \"onlyMainContent\": true,\n  \"includeTags\": [\n    \"<string>\"\n  ],\n  \"excludeTags\": [\n    \"<string>\"\n  ],\n  \"maxAge\": 172800000,\n  \"headers\": {},\n  \"waitFor\": 0,\n  \"mobile\": false,\n  \"skipTlsVerification\": true,\n  \"timeout\": 30000,\n  \"parsers\": [\n    \"pdf\"\n  ],\n  \"actions\": [\n    {\n      \"type\": \"wait\",\n      \"milliseconds\": 2\n    }\n  ],\n  \"location\": {\n    \"country\": \"US\",\n    \"languages\": [\n      \"en-US\"\n    ]\n  },\n  \"removeBase64Images\": true,\n  \"blockAds\": true,\n  \"proxy\": \"auto\",\n  \"storeInCache\": true,\n  \"zeroDataRetention\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -240,
+        -304
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Firecrawl Scrape",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HTTPHEADERAUTH_ID_PLACEHOLDER",
+          "name": "Placeholder httpHeaderAuth Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openweathermap.org/data/2.5/weather?q=Quezon+City&",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        -288
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "POST: OpenWeatherMap",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HTTPHEADERAUTH_ID_PLACEHOLDER",
+          "name": "Placeholder httpHeaderAuth Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v2/extract",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"urls\": [\n    \"https://firecrawl.dev/\",\n    \"https://docs.firecrawl.dev/\",\n    \"https://www.ycombinator.com/companies\"\n  ],\n  \"prompt\": \"Extract the company mission, whether it supports SSO, whether it is open source, whether it is in YC\",\n  \"schema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"company_mission\": {\n        \"type\": \"string\"\n      },\n      \"supports_sso\": {\n        \"type\": \"boolean\"\n      },\n      \"is_open_source\": {\n        \"type\": \"boolean\"\n      },\n      \"is_in_yc\": {\n        \"type\": \"boolean\"\n      }\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        288
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Firecrawl Extract Post Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HTTPHEADERAUTH_ID_PLACEHOLDER",
+          "name": "Placeholder httpHeaderAuth Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        288
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Wait 10s",
+      "webhookId": "WEBHOOK_PLACEHOLDER"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.firecrawl.dev/v2/extract/{{ $json.id }}",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        672,
+        288
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Firecrawl GET Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HTTPHEADERAUTH_ID_PLACEHOLDER",
+          "name": "Placeholder httpHeaderAuth Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ID_PLACEHOLDER",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        208
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "stacruzgarnt@gmail.com",
+        "subject": "Company Mission",
+        "emailType": "text",
+        "message": "={{ $json.data.company_mission }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        160
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Send a message",
+      "webhookId": "WEBHOOK_PLACEHOLDER",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAILOAUTH2_ID_PLACEHOLDER",
+          "name": "Placeholder gmailOAuth2 Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        384
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Wait another 30s",
+      "webhookId": "WEBHOOK_PLACEHOLDER"
+    }
+  ],
+  "pinData": {
+    "Firecrawl Extract Post Request": [
+      {
+        "json": {
+          "success": true,
+          "id": "ID_PLACEHOLDER",
+          "urlTrace": []
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Firecrawl Extract Post Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firecrawl Scrape": {
+      "main": [
+        []
+      ]
+    },
+    "POST: OpenWeatherMap": {
+      "main": [
+        []
+      ]
+    },
+    "Firecrawl Extract Post Request": {
+      "main": [
+        [
+          {
+            "node": "Wait 10s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 10s": {
+      "main": [
+        [
+          {
+            "node": "Firecrawl GET Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Firecrawl GET Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait another 30s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait another 30s": {
+      "main": [
+        [
+          {
+            "node": "Firecrawl GET Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "VERSION_PLACEHOLDER",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "INSTANCE_PLACEHOLDER"
+  },
+  "id": "ID_PLACEHOLDER",
+  "tags": []
+}
