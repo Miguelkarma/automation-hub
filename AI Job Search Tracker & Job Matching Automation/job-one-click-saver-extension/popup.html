@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Job Saver</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        width: 320px;
+        font-family: Inter, Arial, sans-serif;
+        background: #0f172a;
+        color: #e5e7eb;
+      }
+      .app {
+        padding: 16px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .logo {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        object-fit: cover;
+        background: #1e293b;
+        padding: 4px;
+      }
+      .title-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #ffffff;
+      }
+      .subtitle {
+        font-size: 12px;
+        color: #94a3b8;
+      }
+      .card {
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(15, 23, 42, 0.96);
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
+      }
+      .button {
+        width: 100%;
+        border: 0;
+        border-radius: 12px;
+        padding: 12px 14px;
+        cursor: pointer;
+        color: white;
+        font-size: 14px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+        transition:
+          transform 0.12s ease,
+          opacity 0.12s ease;
+      }
+      .button:hover {
+        transform: translateY(-1px);
+        opacity: 0.95;
+      }
+      .button:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+        transform: none;
+      }
+      .hint {
+        margin-top: 10px;
+        color: #94a3b8;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      #status {
+        margin-top: 12px;
+        min-height: 36px;
+        border-radius: 12px;
+        padding: 10px;
+        font-size: 12.5px;
+        line-height: 1.4;
+        color: #cbd5e1;
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        word-break: break-word;
+      }
+      #status.success {
+        color: #bbf7d0;
+        background: rgba(22, 101, 52, 0.25);
+        border-color: rgba(34, 197, 94, 0.35);
+      }
+      #status.error {
+        color: #fecaca;
+        background: rgba(127, 29, 29, 0.3);
+        border-color: rgba(248, 113, 113, 0.4);
+      }
+      #status.loading {
+        color: #bfdbfe;
+        background: rgba(30, 64, 175, 0.25);
+        border-color: rgba(96, 165, 250, 0.35);
+      }
+      .footer {
+        margin-top: 10px;
+        text-align: center;
+        color: #64748b;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="header">
+        <img src="logo.png" class="logo" alt="Job Saver Logo" />
+        <div class="title-wrap">
+          <div class="title">Job One-Click Saver</div>
+          <div class="subtitle">Save job posts to Airtable</div>
+        </div>
+      </div>
+      <div class="card">
+        <button id="saveBtn" class="button">Save Job to Airtable</button>
+        <div class="hint">
+          For JobStreet side panels, highlight the job post if detection fails.
+        </div>
+        <div id="status">Ready to capture the current job page.</div>
+      </div>
+      <div class="footer">n8n - AI - Airtable</div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

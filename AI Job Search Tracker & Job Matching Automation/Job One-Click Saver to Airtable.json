@@ -1,0 +1,1067 @@
+{
+  "name": "Job One-Click Saver to Airtable",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "SECRET_PLACEHOLDER",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Webhook",
+      "webhookId": "WEBHOOK_PLACEHOLDER"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a job description parser and job matching assistant.\n\nReturn only valid JSON.\nDo not use markdown.\nDo not wrap the response in code fences.\nDo not explain your answer.\nDo not invent missing details.\nOnly use information visible in the browser-captured job page text.\nExtract only one opened or selected job post.",
+              "role": "model"
+            },
+            {
+              "content": "=Candidate profile:\nPaul Miguel Santos is an AI Automation Specialist with a web development background.\n\nPrimary focus:\nAI automation, workflow automation, CRM automation, business systems automation, API integrations, and no-code/low-code automation.\n\nAutomation skills:\nn8n, Make.com, Zapier, Airtable, HubSpot, Gmail automation, Slack automation, Google Drive automation, Google Sheets, webhooks, REST APIs, Gemini/OpenAI API.\n\nWeb development background:\nJavaScript, TypeScript, React, Next.js, Vue, Nuxt, Node.js, PHP, Python, Tailwind CSS, Shopware, REST APIs.\n\nExperience:\nAround 1 year of professional web development experience, plus automation portfolio projects.\n\nStrong projects:\nTicket Auto-Router, Client Onboarding Automation, Expense Approval Workflow, Gmail Job Alert Automation, Browser One-Click Job Saver.\n\nPreferred roles:\nAI Automation Specialist, Automation Developer, n8n Automation Builder, CRM Automation Specialist, Business Systems Automation Specialist, Integration Specialist, Operations Automation Specialist, RevOps Automation Specialist, Junior AI Automation Engineer, Junior Automation Developer.\n\nLower priority roles:\nPure Frontend Developer, basic Web Designer, generic Webmaster, content roles, marketing-only roles.\n\nAvoid:\nPure sales roles, cold calling roles, account executive roles, onsite-only roles, very senior roles, unpaid roles, very low salary, jobs unrelated to automation, CRM, APIs, AI tools, or web systems.\n\nScoring rules:\n85-100 = Strong Match\n70-84 = Needs Full JD Review\n50-69 = Maybe\n0-49 = Low Match\n\nFor this browser workflow, still analyze and return the job even if the score is below 70, because the user manually saved/opened it.\n\nAllowed values:\nplatform: Indeed, JobStreet, LinkedIn, OnlineJobs.ph, Other\njob_type: Remote, Hybrid, Onsite, Flexible, Not specified\nmatch_level: Strong Match, Needs Full JD Review, Maybe, Low Match\nstatus: Full JD Analyzed\n\nJob type rules:\n- Use Remote if the job says Remote, Work from Home, WFH, Homebased, or similar.\n- Use Hybrid if the job says Hybrid.\n- Use Onsite if the job clearly requires office/site work.\n- Use Flexible if the job indicates flexible setup but not clearly remote or hybrid.\n- Use Not specified if the work setup is unclear.\n\nMatch level rules:\n- 85-100 = Strong Match\n- 70-84 = Needs Full JD Review\n- 50-69 = Maybe\n- 0-49 = Low Match\n\nYour tasks:\n1. Extract clean job details from the browser-captured job page.\n2. Analyze the full job description against the candidate profile.\n3. Return one valid JSON object only.\n\nImportant:\n- This is not an email alert.\n- Do not return an array of jobs.\n- Extract only the opened/selected job post.\n- Ignore recommended jobs, sidebar jobs, footer links, navigation text, saved jobs, and unrelated listings.\n- If jobTitleHint is provided, prefer it as the job title unless the captured text clearly contradicts it.\n- If companyHint is provided, prefer it as the company unless the captured text clearly contradicts it.\n- If the URL is a generic job board homepage or search page URL, still return the provided URL, but mention in red_flags that the URL may be generic.\n- Do not invent missing details.\n- Only use information visible in the browser-captured job page text.\n\nReturn only valid JSON in this exact format:\n\n{\n  \"job_title\": \"\",\n  \"company\": \"\",\n  \"platform\": \"\",\n  \"job_url\": \"\",\n  \"job_type\": \"Not specified\",\n  \"status\": \"Full JD Analyzed\",\n  \"full_job_description\": \"\",\n  \"full_jd_match_score\": 0,\n  \"match_level\": \"\",\n  \"ai_reason\": \"\",\n  \"matching_skills\": [],\n  \"missing_skills\": [],\n  \"red_flags\": [],\n  \"application_angle\": \"\",\n  \"cover_letter_draft\": \"\"\n}\n\nRules:\n- Return only valid JSON.\n- Do not use markdown.\n- Do not wrap the response in code fences.\n- Do not explain your answer.\n- Do not invent missing details.\n- If company is missing, use an empty string.\n- If job URL is missing, use an empty string.\n- full_job_description must contain the cleaned full job description from the captured text.\n- matching_skills, missing_skills, and red_flags must be arrays of strings.\n- application_angle should explain how Paul should position himself when applying.\n- cover_letter_draft should be short, human, and tailored to the role.\n- status must always be \"Full JD Analyzed\".\n- If the role is not a good match, still return it, but explain why in ai_reason and red_flags.\n- Do not include email-only fields like email_preview, email_match_score, or email_date.\n\nBrowser captured data:\n\nPage URL:\n{{$json.body.url}}\n\nPage title:\n{{$json.body.title}}\n\nPlatform hint:\n{{$json.body.platform}}\n\nDomain:\n{{$json.body.domain}}\n\nJob title hint:\n{{$json.body.jobTitleHint}}\n\nCompany hint:\n{{$json.body.companyHint}}\n\nCapture method:\n{{$json.body.captureMethod}}\n\nDetected selector:\n{{$json.body.detectedSelector}}\n\nSaved at:\n{{$json.body.savedAt}}\n\nCaptured job text:\n{{$json.body.text}}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GOOGLEPALMAPI_ID_PLACEHOLDER",
+          "name": "Placeholder googlePalmApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Job Tracker",
+          "cachedResultUrl": "https://airtable.com/appW6oa4GxqQWVlV9"
+        },
+        "table": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Job Applications",
+          "cachedResultUrl": "https://airtable.com/appW6oa4GxqQWVlV9/tblDeNdU8Pkv7w03o"
+        },
+        "filterByFormula": "=AND(   LOWER({Job Title}) = LOWER(\"{{ $json.job_title }}\"),   LOWER({Company}) = LOWER(\"{{ $json.company }}\") )",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1008,
+        112
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Search records",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "AIRTABLETOKENAPI_ID_PLACEHOLDER",
+          "name": "Placeholder airtableTokenApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ID_PLACEHOLDER",
+              "leftValue": "={{ $json.is_reliable_job_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        768,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "If",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ID_PLACEHOLDER",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1216,
+        112
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "IF Existing Record Found"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Job Tracker",
+          "cachedResultUrl": "https://airtable.com/appW6oa4GxqQWVlV9"
+        },
+        "table": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Job Applications",
+          "cachedResultUrl": "https://airtable.com/appW6oa4GxqQWVlV9/tblDeNdU8Pkv7w03o"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Job Title": "={{ $('Parse').item.json.job_title }}",
+            "Email Match Score": 0,
+            "Full JD Match Score": "={{ $('Parse').item.json.full_jd_match_score }}",
+            "Platform": "={{ $('Parse').item.json.platform }}",
+            "Company": "={{ $('Parse').item.json.company }}",
+            "Job Type": "={{ $('Parse').item.json.job_type }}",
+            "Job URL": "={{ $('Webhook').item.json.body.url }}",
+            "Full Job Description": "={{ $('Parse').item.json.full_job_description }}",
+            "Status": "={{ $('Parse').item.json.status }}",
+            "Match Level": "={{ $('Parse').item.json.match_level }}",
+            "AI Reason": "={{ $('Parse').item.json.ai_reason }}",
+            "Missing Skills": "={{ $('Parse').item.json.matching_skills_text }}",
+            "Matching Skills": "={{ $('Parse').item.json.missing_skills_text }}",
+            "Red Flags": "={{ $('Parse').item.json.red_flags_text }}",
+            "Application Angle": "={{ $('Parse').item.json.application_angle }}",
+            "Cover Letter Draft": "={{ $('Parse').item.json.cover_letter_draft }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Indeed",
+                  "value": "Indeed"
+                },
+                {
+                  "name": "JobStreet",
+                  "value": "JobStreet"
+                },
+                {
+                  "name": "LinkedIn",
+                  "value": "LinkedIn"
+                },
+                {
+                  "name": "OnlineJobs.ph",
+                  "value": "OnlineJobs.ph"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job URL",
+              "displayName": "Job URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Type",
+              "displayName": "Job Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Remote",
+                  "value": "Remote"
+                },
+                {
+                  "name": "Hybrid",
+                  "value": "Hybrid"
+                },
+                {
+                  "name": "Onsite",
+                  "value": "Onsite"
+                },
+                {
+                  "name": "Flexible",
+                  "value": "Flexible"
+                },
+                {
+                  "name": "Not specified",
+                  "value": "Not specified"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email Preview",
+              "displayName": "Email Preview",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email Match Score",
+              "displayName": "Email Match Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Match Level",
+              "displayName": "Match Level",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Strong Match",
+                  "value": "Strong Match"
+                },
+                {
+                  "name": "Needs Full JD Review",
+                  "value": "Needs Full JD Review"
+                },
+                {
+                  "name": "Maybe",
+                  "value": "Maybe"
+                },
+                {
+                  "name": "Low Match",
+                  "value": "Low Match"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Email Preview Only",
+                  "value": "Email Preview Only"
+                },
+                {
+                  "name": "Needs Full JD Review",
+                  "value": "Needs Full JD Review"
+                },
+                {
+                  "name": "Full JD Analyzed",
+                  "value": "Full JD Analyzed"
+                },
+                {
+                  "name": "Ready to Apply",
+                  "value": "Ready to Apply"
+                },
+                {
+                  "name": "Applied",
+                  "value": "Applied"
+                },
+                {
+                  "name": "Interview",
+                  "value": "Interview"
+                },
+                {
+                  "name": "Rejected",
+                  "value": "Rejected"
+                },
+                {
+                  "name": "Ghosted",
+                  "value": "Ghosted"
+                },
+                {
+                  "name": "Archived",
+                  "value": "Archived"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email Date",
+              "displayName": "Email Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Full Job Description",
+              "displayName": "Full Job Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Full JD Match Score",
+              "displayName": "Full JD Match Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Reason",
+              "displayName": "AI Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Missing Skills",
+              "displayName": "Missing Skills",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Matching Skills",
+              "displayName": "Matching Skills",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Red Flags",
+              "displayName": "Red Flags",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Application Angle",
+              "displayName": "Application Angle",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cover Letter Draft",
+              "displayName": "Cover Letter Draft",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1440,
+        208
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "AIRTABLETOKENAPI_ID_PLACEHOLDER",
+          "name": "Placeholder airtableTokenApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = $json.content.parts[0].text;\n\nlet parsed;\n\ntry {\n  parsed = JSON.parse(rawText);\n} catch (error) {\n  throw new Error(\"AI returned invalid JSON: \" + error.message + \"\\nRaw text: \" + rawText);\n}\n\nconst jobUrl = (parsed.job_url || \"\").trim();\nconst normalizedUrl = jobUrl.toLowerCase();\n\nconst hasSpecificJobClue =\n  normalizedUrl.includes(\"/job/\") ||\n  normalizedUrl.includes(\"/jobs/\") ||\n  normalizedUrl.includes(\"jobs/view\") ||\n  normalizedUrl.includes(\"jk=\") ||\n  normalizedUrl.includes(\"jobid=\") ||\n  normalizedUrl.includes(\"job-id\") ||\n  normalizedUrl.includes(\"job_id\");\n\nconst genericUrls = [\n  \"https://ph.jobstreet.com/\",\n  \"https://www.jobstreet.com/\",\n  \"https://www.jobstreet.com.ph/\",\n  \"https://ph.indeed.com/\",\n  \"https://www.indeed.com/\",\n  \"https://www.linkedin.com/jobs/\",\n  \"https://www.onlinejobs.ph/\",\n];\n\nconst isGenericJobUrl =\n  !jobUrl ||\n  genericUrls.includes(normalizedUrl) ||\n  (\n    (\n      normalizedUrl.endsWith(\"jobstreet.com/\") ||\n      normalizedUrl.endsWith(\"indeed.com/\") ||\n      normalizedUrl.endsWith(\"linkedin.com/jobs/\") ||\n      normalizedUrl.endsWith(\"onlinejobs.ph/\")\n    ) &&\n    !hasSpecificJobClue\n  );\n\nreturn [\n  {\n    json: {\n      ...parsed,\n\n      is_reliable_job_url: !isGenericJobUrl,\n\n      matching_skills_text: Array.isArray(parsed.matching_skills)\n        ? parsed.matching_skills.join(\", \")\n        : parsed.matching_skills || \"\",\n\n      missing_skills_text: Array.isArray(parsed.missing_skills)\n        ? parsed.missing_skills.join(\", \")\n        : parsed.missing_skills || \"\",\n\n      red_flags_text: Array.isArray(parsed.red_flags)\n        ? parsed.red_flags.join(\", \")\n        : parsed.red_flags || \"\",\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Parse"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Job Tracker",
+          "cachedResultUrl": "https://airtable.com/appW6oa4GxqQWVlV9"
+        },
+        "table": {
+          "__rl": true,
+          "value": "SECRET_PLACEHOLDER",
+          "mode": "list",
+          "cachedResultName": "Job Applications",
+          "cachedResultUrl": "https://airtable.com/appW6oa4GxqQWVlV9/tblDeNdU8Pkv7w03o"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Platform": "={{ $json.Platform }}",
+            "Job Type": "={{ $json[\"Job Type\"] }}",
+            "Job URL": "={{ $('Message a model').item.json.citationMetadata.citationSources[0].uri }}",
+            "Match Level": "={{ $json[\"Match Level\"] }}",
+            "Status": "={{ $json.Status }}",
+            "Full Job Description": "={{ $json[\"Full Job Description\"] }}",
+            "Matching Skills": "={{ $json[\"Matching Skills\"] }}",
+            "Cover Letter Draft": "={{ $json[\"Cover Letter Draft\"] }}",
+            "Red Flags": "={{ $json[\"Red Flags\"] }}",
+            "Application Angle": "={{ $json[\"Application Angle\"] }}",
+            "AI Reason": "={{ $json[\"AI Reason\"] }}",
+            "Missing Skills": "={{ $json[\"Missing Skills\"] }}",
+            "Full JD Match Score": "={{ $json[\"Full JD Match Score\"] }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Job Title",
+              "displayName": "Job Title",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Platform",
+              "displayName": "Platform",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Indeed",
+                  "value": "Indeed"
+                },
+                {
+                  "name": "JobStreet",
+                  "value": "JobStreet"
+                },
+                {
+                  "name": "LinkedIn",
+                  "value": "LinkedIn"
+                },
+                {
+                  "name": "OnlineJobs.ph",
+                  "value": "OnlineJobs.ph"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job URL",
+              "displayName": "Job URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Job Type",
+              "displayName": "Job Type",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Remote",
+                  "value": "Remote"
+                },
+                {
+                  "name": "Hybrid",
+                  "value": "Hybrid"
+                },
+                {
+                  "name": "Onsite",
+                  "value": "Onsite"
+                },
+                {
+                  "name": "Flexible",
+                  "value": "Flexible"
+                },
+                {
+                  "name": "Not specified",
+                  "value": "Not specified"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email Preview",
+              "displayName": "Email Preview",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email Match Score",
+              "displayName": "Email Match Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Match Level",
+              "displayName": "Match Level",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Strong Match",
+                  "value": "Strong Match"
+                },
+                {
+                  "name": "Needs Full JD Review",
+                  "value": "Needs Full JD Review"
+                },
+                {
+                  "name": "Maybe",
+                  "value": "Maybe"
+                },
+                {
+                  "name": "Low Match",
+                  "value": "Low Match"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Email Preview Only",
+                  "value": "Email Preview Only"
+                },
+                {
+                  "name": "Needs Full JD Review",
+                  "value": "Needs Full JD Review"
+                },
+                {
+                  "name": "Full JD Analyzed",
+                  "value": "Full JD Analyzed"
+                },
+                {
+                  "name": "Ready to Apply",
+                  "value": "Ready to Apply"
+                },
+                {
+                  "name": "Applied",
+                  "value": "Applied"
+                },
+                {
+                  "name": "Interview",
+                  "value": "Interview"
+                },
+                {
+                  "name": "Rejected",
+                  "value": "Rejected"
+                },
+                {
+                  "name": "Ghosted",
+                  "value": "Ghosted"
+                },
+                {
+                  "name": "Archived",
+                  "value": "Archived"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email Date",
+              "displayName": "Email Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Full Job Description",
+              "displayName": "Full Job Description",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Full JD Match Score",
+              "displayName": "Full JD Match Score",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "AI Reason",
+              "displayName": "AI Reason",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Missing Skills",
+              "displayName": "Missing Skills",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Matching Skills",
+              "displayName": "Matching Skills",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Red Flags",
+              "displayName": "Red Flags",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Application Angle",
+              "displayName": "Application Angle",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cover Letter Draft",
+              "displayName": "Cover Letter Draft",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1408,
+        -112
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Create or update a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "AIRTABLETOKENAPI_ID_PLACEHOLDER",
+          "name": "Placeholder airtableTokenApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"action\": \"updated\",\n  \"message\": \"Existing job updated in Airtable\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1616,
+        -112
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"action\": \"updated\",\n  \"message\": \"Existing job updated in Airtable\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1648,
+        208
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Parse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "IF Existing Record Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Existing Record Found": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "VERSION_PLACEHOLDER",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "INSTANCE_PLACEHOLDER"
+  },
+  "id": "ID_PLACEHOLDER",
+  "tags": []
+}
