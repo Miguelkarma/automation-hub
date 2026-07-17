@@ -1,0 +1,770 @@
+{
+  "name": "Pipeline Recovery & Follow-Up Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "deal",
+        "operation": "getAll",
+        "limit": 10,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        208,
+        256
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Get many deals",
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "ZOHOOAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder zohoOAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const deal = item.json;\n\n  return {\n    json: {\n      record_type: \"Deal\",\n      zoho_record_id: deal.id || null,\n\n      deal_name: deal.Deal_Name || null,\n      company_name: deal.Account_Name?.name || null,\n\n      contact_name: deal.Contact_Name?.name || null,\n      contact_id: deal.Contact_Name?.id || null,\n      contact_email: deal.Contact_Name?.email || null,\n\n      stage: deal.Stage || null,\n      deal_value: deal.Amount || 0,\n      probability: deal.Probability || null,\n\n      owner: deal.Owner?.name || deal.Deal_Owner?.name || deal.Created_By?.name || null,\n      owner_email: deal.Owner?.email || deal.Deal_Owner?.email || deal.Created_By?.email || null,\n\n      last_follow_up_date: deal.Last_Follow_Up_Date || null,\n      closing_date: deal.Closing_Date || null,\n\n      modified_time: deal.Modified_Time || null,\n      created_time: deal.Created_Time || null,\n\n      source_module: \"Deals\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        256
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Normalize Deal Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ID_PLACEHOLDER",
+              "leftValue": "={{ $json.is_stale }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        256
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Is Record Stale?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const staleRules = {\n  \"Qualification\": 2,\n  \"Needs Analysis\": 3,\n  \"Proposal/Price Quote\": 5,\n  \"Negotiation/Review\": 2,\n  \"Value Proposition\": 5,\n  \"Identify Decision Makers\": 5\n};\n\nreturn items.map(item => {\n  const deal = item.json;\n\n  const today = new Date();\n  const lastFollowUpDate = deal.last_follow_up_date\n    ? new Date(deal.last_follow_up_date)\n    : null;\n\n  let daysInactive = null;\n  let staleAfterDays = staleRules[deal.stage] ?? null;\n  let isStale = false;\n\n  if (lastFollowUpDate && staleAfterDays !== null) {\n    const diffMs = today - lastFollowUpDate;\n    daysInactive = Math.floor(diffMs / (1000 * 60 * 60 * 24));\n    isStale = daysInactive >= staleAfterDays;\n  }\n\n  return {\n    json: {\n      ...deal,\n      days_inactive: daysInactive,\n      stale_after_days: staleAfterDays,\n      is_stale: isStale\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        256
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Calculate Days Inactive"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI sales operations assistant.\n\nAnalyze this stale Zoho CRM deal and return ONLY valid JSON.\n\nDo not include markdown.\nDo not include explanations outside JSON.\nDo not wrap the JSON in ```json.\nDo not add extra fields.\n\nUse this exact JSON structure:\n{\n  \"risk_level\": \"Low | Medium | High\",\n  \"reason\": \"\",\n  \"recommended_action\": \"\",\n  \"follow_up_subject\": \"\",\n  \"follow_up_email\": \"\",\n  \"crm_task_title\": \"\",\n  \"crm_task_description\": \"\"\n}\n\nDeal data:\nRecord Type: {{ $json.record_type }}\nDeal Name: {{ $json.deal_name }}\nCompany Name: {{ $json.company_name }}\nContact Name: {{ $json.contact_name }}\nContact Email: {{ $json.contact_email }}\nStage: {{ $json.stage }}\nDeal Value: {{ $json.deal_value }}\nOwner: {{ $json.owner }}\nLast Follow Up Date: {{ $json.last_follow_up_date }}\nDays Inactive: {{ $json.days_inactive }}\nStale After Days: {{ $json.stale_after_days }}\nClosing Date: {{ $json.closing_date }}\n\nRules:\n- Risk level must be Low, Medium, or High.\n- High risk means the deal is high value, close to closing date, or inactive much longer than allowed.\n- Medium risk means the deal is stale but not urgent.\n- Low risk means the deal is only slightly stale or low value.\n- The follow-up email should be professional, friendly, and concise.\n- Do not invent specific promises, discounts, meetings, or contract terms.\n- The email should be written from the deal owner to the contact.\n- If contact name is missing, use a neutral greeting like \"Hi there\".\n- If contact email is missing, still draft the email body.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1776,
+        376
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-32b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1848,
+        600
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "GROQAPI_ID_PLACEHOLDER",
+          "name": "Placeholder groqApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const rawOutput = item.json.output || \"\";\n\n  let cleaned = rawOutput.trim();\n\n  // Remove <think>...</think> blocks if the model outputs reasoning\n  cleaned = cleaned.replace(/<think>[\\s\\S]*?<\\/think>/gi, \"\").trim();\n\n  // Remove markdown code fences if present\n  cleaned = cleaned\n    .replace(/^```json\\s*/i, \"\")\n    .replace(/^```\\s*/i, \"\")\n    .replace(/```$/i, \"\")\n    .trim();\n\n  // Extract the first JSON object from the remaining text\n  const jsonMatch = cleaned.match(/\\{[\\s\\S]*\\}/);\n\n  if (!jsonMatch) {\n    throw new Error(`No JSON object found in AI output: ${rawOutput}`);\n  }\n\n  let parsed;\n\n  try {\n    parsed = JSON.parse(jsonMatch[0]);\n  } catch (error) {\n    throw new Error(`AI returned invalid JSON after cleaning: ${jsonMatch[0]}`);\n  }\n\n  const requiredFields = [\n    \"risk_level\",\n    \"reason\",\n    \"recommended_action\",\n    \"follow_up_subject\",\n    \"follow_up_email\",\n    \"crm_task_title\",\n    \"crm_task_description\"\n  ];\n\n  for (const field of requiredFields) {\n    if (!(field in parsed)) {\n      throw new Error(`Missing required AI field: ${field}`);\n    }\n  }\n\n  return {\n    json: {\n      ...item.json,\n\n      ai_risk_level: parsed.risk_level,\n      ai_reason: parsed.reason,\n      ai_suggested_action: parsed.recommended_action,\n      follow_up_subject: parsed.follow_up_subject,\n      follow_up_email: parsed.follow_up_email,\n      crm_task_title: parsed.crm_task_title,\n      crm_task_description: parsed.crm_task_description\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        376
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Parse AI JSON"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "SECRET_PLACEHOLDER",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2352,
+        256
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Merge Deal + AI Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.zohoapis.com/crm/v2/Tasks",
+        "authentication": "SECRET_PLACEHOLDER",
+        "nodeCredentialType": "zohoOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": [\n    {\n      \"Subject\": \"{{ $json.crm_task_title }}\",\n      \"Description\": \"This deal needs follow-up because it has been inactive for {{ $json.days_inactive }} days.\\n\\nSuggested next action:\\n{{ $json.ai_suggested_action }}\\n\\nContext:\\nDeal: {{ $json.deal_name }}\\nCompany: {{ $json.company_name }}\\nStage: {{ $json.stage }}\\nDeal Value: {{ $json.deal_value }}\\nLast Follow Up Date: {{ $json.last_follow_up_date }}\\nClosing Date: {{ $json.closing_date }}\\n\\nReason:\\n{{ $json.ai_reason }}\",\n      \"Due_Date\": \"{{ new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] }}\",\n      \"Status\": \"Not Started\",\n      \"Priority\": \"{{ $json.ai_risk_level === 'High' ? 'High' : $json.ai_risk_level === 'Medium' ? 'Normal' : 'Low' }}\",\n      \"What_Id\": \"{{ $json.zoho_record_id }}\",\n      \"$se_module\": \"Deals\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2576,
+        -80
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Create Zoho Task",
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "ZOHOOAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder zohoOAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheet.zoho.com/api/v2/q33ie320f8a7f9a5e4c118ac6114e1bca94d0",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "method",
+              "value": "worksheet.records.add"
+            },
+            {
+              "name": "worksheet_name",
+              "value": "Stale Deal Reviews"
+            },
+            {
+              "name": "json_data",
+              "value": "=[\n  {\n    \"Zoho Record ID\": \"{{ $json.zoho_record_id }}\",\n    \"Deal Name\": \"{{ $json.deal_name }}\",\n    \"Company Name\": \"{{ $json.company_name }}\",\n    \"Contact Name\": \"{{ $json.contact_name }}\",\n    \"Stage\": \"{{ $json.stage }}\",\n    \"Deal Value\": \"{{ $json.deal_value }}\",\n    \"Days Inactive\": \"{{ $json.days_inactive }}\",\n    \"Risk Level\": \"{{ $json.ai_risk_level }}\",\n    \"Reason Summary\": \"{{ $json.ai_reason }}\",\n    \"Suggested Action\": \"{{ $json.ai_suggested_action }}\",\n   \"Follow-Up Subject\": \"{{ $json.follow_up_subject }}\",\n    \"Draft Created\": \"Yes\",\n    \"Gmail Draft ID\": \"{{ $json.id }}\",\n    \"Approval Status\": \"Needs Review\",\n    \"Created At\": \"{{ new Date().toISOString() }}\",\n    \"Sent At\": \"\",\n    \"Send Error\": \"\"\n  }\n]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3696,
+        448
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Add Review Row to Zoho Sheet",
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "ZOHOOAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder zohoOAuth2Api Credential"
+        },
+        "oAuth2Api": {
+          "id": "OAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder oAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.follow_up_subject }}",
+        "message": "={{ $json.follow_up_email }}",
+        "options": {
+          "sendTo": "={{ $json.contact_email }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3248,
+        448
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Create a draft",
+      "webhookId": "WEBHOOK_PLACEHOLDER",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAILOAUTH2_ID_PLACEHOLDER",
+          "name": "Placeholder gmailOAuth2 Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheet.zoho.com/api/v2/q33ie320f8a7f9a5e4c118ac6114e1bca94d0",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "method",
+              "value": "worksheet.records.fetch"
+            },
+            {
+              "name": "worksheet_name",
+              "value": "Stale Deal Reviews"
+            },
+            {
+              "name": "criteria",
+              "value": "=\"Zoho Record ID\"=\"{{ $json.zoho_record_id }}\""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1104,
+        328
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Check Existing Review Row",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "OAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder oAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "SECRET_PLACEHOLDER",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1328,
+        256
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Merge Deal + Existing Check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ID_PLACEHOLDER",
+              "leftValue": "={{ $json.records_count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1552,
+        256
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Deals exists?"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "SECRET_PLACEHOLDER",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2800,
+        448
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Merge Deal + Contact"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const data = item.json;\n\n  return {\n    json: {\n      ...data,\n\n      contact_email: data.Email || data.email || data.contact_email || null\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3024,
+        448
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Set Contact Email"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "SECRET_PLACEHOLDER",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3472,
+        376
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Merge Deal + Draft"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.zohoapis.com/crm/v2/Deals/{{ $json.zoho_record_id }}/Notes",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"data\": [\n    {\n      \"Note_Title\": \"Follow-up review needed - {{ $json.deal_name }}\",\n      \"Note_Content\": \"This deal needs follow-up review. It is currently in {{ $json.stage }} and has been inactive for {{ $json.days_inactive }} days.\\n\\n{{ $json.ai_reason }}\\n\\nRecommended next step: {{ $json.ai_suggested_action }}\\n\\nA follow-up task was created and a Gmail draft is ready for review.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2576,
+        112
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Add Zoho Note",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "OAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder oAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "SECRET_PLACEHOLDER",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3920,
+        376
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Merge Review + Deal Data"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        256
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "get",
+        "contactId": "={{ $json.contact_id }}"
+      },
+      "type": "n8n-nodes-base.zohoCrm",
+      "typeVersion": 1,
+      "position": [
+        2576,
+        520
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Get Contact Details",
+      "credentials": {
+        "zohoOAuth2Api": {
+          "id": "ZOHOOAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder zohoOAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=",
+        "options": {},
+        "embeds": {
+          "values": [
+            {
+              "description": "=**📌 Stale deal follow-up ready for review**\n\n**Company:** {{ $json.company_name }}\n**Contact:** {{ $json.contact_name }}\n**Stage:** {{ $json.stage }}\n**Deal Value:** ₱{{ Number($json.deal_value).toLocaleString('en-PH') }}\n**Days Inactive:** {{ $json.days_inactive }} days\n**Risk Level:** {{ $json.ai_risk_level }}\n\n**Suggested Action:**\n{{ $json.ai_suggested_action }}\n\nA Zoho CRM task and Gmail draft have been created. Please review this item in Zoho Sheet before sending.",
+              "color": "#F52323",
+              "timestamp": "={{ new Date().toISOString() }}",
+              "title": "={{ $json.deal_name }} requires follow-up"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        4144,
+        376
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Send Review Alert",
+      "webhookId": "WEBHOOK_PLACEHOLDER",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "DISCORDWEBHOOKAPI_ID_PLACEHOLDER",
+          "name": "Placeholder discordWebhookApi Credential"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get many deals": {
+      "main": [
+        [
+          {
+            "node": "Normalize Deal Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Deal Data": {
+      "main": [
+        [
+          {
+            "node": "Calculate Days Inactive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Days Inactive": {
+      "main": [
+        [
+          {
+            "node": "Is Record Stale?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Record Stale?": {
+      "main": [
+        [
+          {
+            "node": "Check Existing Review Row",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Deal + Existing Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "SECRET_PLACEHOLDER",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse AI JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI JSON": {
+      "main": [
+        [
+          {
+            "node": "Merge Deal + AI Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Deal + AI Data": {
+      "main": [
+        [
+          {
+            "node": "Create Zoho Task",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Contact Details",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Deal + Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Deal + Draft",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Zoho Note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Zoho Task": {
+      "main": [
+        []
+      ]
+    },
+    "Add Review Row to Zoho Sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge Review + Deal Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create a draft": {
+      "main": [
+        [
+          {
+            "node": "Merge Deal + Draft",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Check Existing Review Row": {
+      "main": [
+        [
+          {
+            "node": "Merge Deal + Existing Check",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Deal + Existing Check": {
+      "main": [
+        [
+          {
+            "node": "Deals exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deals exists?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Deal + AI Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Deal + Contact": {
+      "main": [
+        [
+          {
+            "node": "Set Contact Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Contact Email": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Deal + Draft": {
+      "main": [
+        [
+          {
+            "node": "Add Review Row to Zoho Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Review + Deal Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Review + Deal Data": {
+      "main": [
+        [
+          {
+            "node": "Send Review Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many deals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact Details": {
+      "main": [
+        [
+          {
+            "node": "Merge Deal + Contact",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Send Review Alert": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "VERSION_PLACEHOLDER",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "INSTANCE_PLACEHOLDER"
+  },
+  "id": "ID_PLACEHOLDER",
+  "tags": []
+}

@@ -1,0 +1,353 @@
+{
+  "name": "Zoho CRM Follow-Up Approval & Sending",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        -32
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheet.zoho.com/api/v2/q33ie320f8a7f9a5e4c118ac6114e1bca94d0",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "method",
+              "value": "worksheet.records.fetch"
+            },
+            {
+              "name": "worksheet_name",
+              "value": "Stale Deal Reviews"
+            },
+            {
+              "name": "criteria",
+              "value": "\"Approval Status\"=\"Approved\""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        -32
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "HTTP Request",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "OAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder oAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "records",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -32
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Split Approved Reviews"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://gmail.googleapis.com/gmail/v1/users/me/drafts/send",
+        "authentication": "SECRET_PLACEHOLDER",
+        "nodeCredentialType": "gmailOAuth2",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  id: $json[\"Gmail Draft ID\"]\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        672,
+        -32
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Send Approved Gmail Draft",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAILOAUTH2_ID_PLACEHOLDER",
+          "name": "Placeholder gmailOAuth2 Credential"
+        }
+      },
+      "onError": "SECRET_PLACEHOLDER"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheet.zoho.com/api/v2/q33ie320f8a7f9a5e4c118ac6114e1bca94d0",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "method",
+              "value": "worksheet.records.update"
+            },
+            {
+              "name": "worksheet_name",
+              "value": "Stale Deal Reviews"
+            },
+            {
+              "name": "criteria",
+              "value": "={{ '\"Zoho Record ID\"=\"' + $('Split Approved Reviews').item.json['Zoho Record ID'] + '\"' }}"
+            },
+            {
+              "name": "data",
+              "value": "={{ JSON.stringify({\n  \"Approval Status\": \"Sent\",\n  \"Sent At\": new Date().toISOString(),\n  \"Send Error\": \"\"\n}) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        896,
+        -224
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Update Review as Sent",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HTTPHEADERAUTH_ID_PLACEHOLDER",
+          "name": "Placeholder httpHeaderAuth Credential"
+        },
+        "oAuth2Api": {
+          "id": "OAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder oAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheet.zoho.com/api/v2/q33ie320f8a7f9a5e4c118ac6114e1bca94d0",
+        "authentication": "SECRET_PLACEHOLDER",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "method",
+              "value": "worksheet.records.update"
+            },
+            {
+              "name": "worksheet_name",
+              "value": "Stale Deal Reviews"
+            },
+            {
+              "name": "criteria",
+              "value": "={{ '\"Zoho Record ID\"=\"' + $('Split Approved Reviews').item.json['Zoho Record ID'] + '\"' }}"
+            },
+            {
+              "name": "data",
+              "value": "={{ JSON.stringify({\n  \"Approval Status\": \"Escalated\",\n  \"Send Error\": $json.error?.message || $json.message || \"Gmail draft send failed\"\n}) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        944,
+        48
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Update Review as Escalated",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "OAUTH2API_ID_PLACEHOLDER",
+          "name": "Placeholder oAuth2Api Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=",
+        "options": {},
+        "embeds": {
+          "values": [
+            {
+              "description": "=Deal: {{ $('Split Approved Reviews').item.json['Deal Name'] }}\nCompany: {{ $('Split Approved Reviews').item.json['Company Name'] }}\nContact: {{ $('Split Approved Reviews').item.json['Contact Name'] }}\nStatus: Sent\nSent At: {{ new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) }}",
+              "color": "#78F439",
+              "timestamp": "={{ new Date().toISOString() }}",
+              "title": "={{ `Follow-Up Sent — ${$('Split Approved Reviews').item.json['Deal Name']}` }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        -128
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Send Success Confirmation",
+      "webhookId": "WEBHOOK_PLACEHOLDER",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "DISCORDWEBHOOKAPI_ID_PLACEHOLDER",
+          "name": "Placeholder discordWebhookApi Credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=",
+        "options": {},
+        "embeds": {
+          "values": [
+            {
+              "description": "=Deal: {{ $('Split Approved Reviews').item.json['Deal Name'] }}\nCompany: {{ $('Split Approved Reviews').item.json['Company Name'] }}\nContact: {{ $('Split Approved Reviews').item.json['Contact Name'] }}\nStatus: Escalated\n\nError:\n{{ $('Send Approved Gmail Draft').item.json.error?.message || $('Send Approved Gmail Draft').item.json.message || \"Gmail draft send failed\" }}",
+              "color": "#78F439",
+              "timestamp": "={{ new Date().toISOString() }}",
+              "title": "={{ ` Follow-Up Send Failed — ${$('Split Approved Reviews').item.json['Deal Name']}` }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        64
+      ],
+      "id": "ID_PLACEHOLDER",
+      "name": "Send Failure Alert",
+      "webhookId": "WEBHOOK_PLACEHOLDER",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "DISCORDWEBHOOKAPI_ID_PLACEHOLDER",
+          "name": "Placeholder discordWebhookApi Credential"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Approved Reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Approved Reviews": {
+      "main": [
+        [
+          {
+            "node": "Send Approved Gmail Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Approved Gmail Draft": {
+      "main": [
+        [
+          {
+            "node": "Update Review as Sent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Review as Escalated",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Review as Sent": {
+      "main": [
+        [
+          {
+            "node": "Send Success Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Review as Escalated": {
+      "main": [
+        [
+          {
+            "node": "Send Failure Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "VERSION_PLACEHOLDER",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "INSTANCE_PLACEHOLDER"
+  },
+  "id": "ID_PLACEHOLDER",
+  "tags": []
+}
